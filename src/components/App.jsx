@@ -1,71 +1,68 @@
-import ContactForm from "./ContactForm/ContactForm";
-import Filter from "./Filter/Filter";
-import ContactList from "./ContactList/ContactList";
-import { useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { TitlePhonebook } from './TitlePhonebook/TitlePhonebook';
+import { TitleContacts } from './TitleContacts/TitleContacts';
+import { Application } from './App.styled';
+import { ContactForm } from './ContactForm/ContactForm';
+import { ContactList } from './ContactList/ContactList';
+import { nanoid } from 'nanoid';
+import { Filter } from './Filter/Filter';
 
-export default function App() {
-  const [contacts, setContacts] = useState([]);
-  const [isOpen, setIsOpen] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredContacts, setFilteredContacts] = useState([]);
+export const App = () => {
+  const [contacts, setContacts] = useState(
+    JSON.parse(localStorage.getItem('contacts')) || []
+  );
+  const [filter, setFilter] = useState('');
 
-  function onFormSubmit(contact) {
-    const contactExist = contacts.some(
-      (item) => item.contact === contact.contact
-    );
+  useEffect(() => {
+    const contactsFromLS = JSON.parse(localStorage.getItem('contacts')) || [];
+    setContacts(contactsFromLS);
+  }, []);
 
-    if (contactExist) {
-      alert(`${contact.contact} is already in contacts.`);
-    } else {
-      setContacts((contacts) => [...contacts, contact]);
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  const formSubmitHandler = formState => {
+    const contactId = nanoid(5);
+    formState.id = contactId;
+    if (
+      contacts.find(
+        ({ name }) => formState.name.toLowerCase() === name.toLowerCase()
+      )
+    ) {
+      alert(`${formState.name} is already in contacts`);
+      return;
     }
-  }
+    setContacts(prevState => [...prevState, formState]);
+  };
 
-  function onDeleteHandler(id) {
-    setContacts((contact) => contact.filter((item) => item.id !== id));
-    setFilteredContacts((contact) => contact.filter((item) => item.id !== id));
-  }
+  const changeInput = input => {
+    setFilter(input.value);
+  };
 
-  function onInputHandler(evt) {
-    const searchTerm = evt.toLowerCase();
-    setSearchTerm(searchTerm);
-
-    const filtered = contacts.filter((item) =>
-      item.contact.toLowerCase().includes(searchTerm)
+  const deleteContact = contactId => {
+    setContacts(prevState =>
+      prevState.filter(contact => contact.id !== contactId)
     );
-    setFilteredContacts(filtered);
-  }
+  };
+
+  const findContact = () => {
+    const filterContact = contacts.filter(({ name }) => {
+      return name.includes(filter);
+    });
+    return filterContact;
+  };
 
   return (
-    <div className="container">
-      <div className="wrapper" style={isOpen === true ? {} : { padding: "0" }}>
-        <button className="close" onClick={() => setIsOpen(!isOpen)}>
-          &times;
-        </button>
-        {isOpen && (
-          <>
-            <div className="phonebook-wrapper">
-              <h1>Phonebook</h1>
-              <ContactForm onFormSubmit={onFormSubmit} />
-            </div>
-
-            {contacts.length !== 0 && (
-              <div className="contacts-wrapper">
-                <h2>Contacts</h2>
-                <Filter contacts={contacts} onInputHandler={onInputHandler} />
-                <ContactList
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  filteredContacts={filteredContacts}
-                  contacts={contacts}
-                  onDeleteHandler={onDeleteHandler}
-                />
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+    <Application>
+      <TitlePhonebook title="Phonebook" />
+      <ContactForm onSubmitForm={formSubmitHandler} />
+      <TitleContacts title="Contacts" />
+      <Filter onChangeInput={changeInput} inputFilter={filter} />
+      <ContactList
+        onDeleteContact={deleteContact}
+        onfindContact={findContact}
+      />
+    </Application>
   );
-}
-
+};

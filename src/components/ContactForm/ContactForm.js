@@ -1,50 +1,61 @@
 import { useState } from 'react';
+import { Form } from './ContactForm.styled';
+import { nanoid } from 'nanoid';
 
-export default function ContactForm({ onFormSubmit }) {
-  const [contact, setContact] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('')
+export const ContactForm = ({ onSubmitForm }) => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
-  function HandleSubmit(evt) {
-    evt.preventDefault();
+  const submitForm = e => {
+    e.preventDefault();
+    onSubmitForm({ name: name, number: number });
+    setName('');
+    setNumber('');
+  };
 
-    const newValue = { contact, phoneNumber, id: crypto.randomUUID() };
-
-    if (!contact || !phoneNumber) {
-      return;
+  const changeInput = input => {
+    switch (input.name) {
+      case 'name':
+        setName(input.value);
+        break;
+      case 'number':
+        setNumber(input.value);
+        break;
+      default:
     }
+  };
 
-    onFormSubmit(newValue);
+  const inputNameId = nanoid(5);
+  const inputNamberId = nanoid(5);
 
-    setContact('');
-    setPhoneNumber('');
-  }
   return (
-    <form onSubmit={HandleSubmit} className="contact-form">
-      <label htmlFor="name">Name</label>
+    <Form onSubmit={submitForm}>
+      <label htmlFor={inputNameId}>Name</label>
       <input
         type="text"
+        id={inputNameId}
         name="name"
-        placeholder="Name Surname"
-        value={contact}
-        onChange={evt => setContact(evt.target.value)}
+        placeholder="Enter name ..."
+        // колбек потрібен щоб передати інфу, інашке ми її викличемо і на onChange прилетить виконання функції, а нам потрибно щоб запустилась
+        onChange={e => {
+          return changeInput(e.target);
+        }}
+        value={name}
         required
       />
-      <label htmlFor="number">Number</label>
+      <label htmlFor={inputNamberId}>Number</label>
       <input
-        type="text"
+        type="tel"
         name="number"
-        placeholder="+380 964 56 89"
-        value={phoneNumber}
-        onChange={evt =>
-          setPhoneNumber(
-            typeof evt.target.value === 'string'
-              ? evt.target.value
-              : +evt.target.value
-          )
-        }
+        id={inputNamberId}
+        placeholder="tel: xxx-xx-xx"
+        onChange={e => {
+          return changeInput(e.target);
+        }}
+        value={number}
         required
       />
-      <button className="contact-btn">Add contact</button>
-    </form>
+      <button type="submit">Add contact</button>
+    </Form>
   );
-}
+};
