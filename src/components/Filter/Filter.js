@@ -1,15 +1,17 @@
-export default function Filter({ onInputHandler }) {
+import React from 'react';
+import { FilterWrap } from './Filter.styled';
+
+export const Filter = ({ onChangeInput, inputFilter }) => {
   return (
-    <div className="filter">
-      <label htmlFor="search">Find contacts by name</label>
+    <FilterWrap>
+      <label htmlFor="filter">Find contacts by name</label>
       <input
         type="text"
-        name="search"
-        placeholder="Name Surname"
-        onChange={evt => {
-          onInputHandler(evt.target.value);
-        }}
+        id="filter"
+        name="filter"
+        value={inputFilter}
+        onChange={e => onChangeInput(e.target)}
       />
-    </div>
+    </FilterWrap>
   );
-}
+};
