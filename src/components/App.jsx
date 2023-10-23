@@ -46,12 +46,13 @@ export const App = () => {
     );
   };
 
-  const findContact = () => {
-    const filterContact = contacts.filter(({ name }) => {
-      return name.includes(filter);
-    });
-    return filterContact;
-  };
+ const findContact = () => {
+   const lowerCaseFilter = filter.toLowerCase(); 
+   const filterContact = contacts.filter(({ name }) => {
+     return name.toLowerCase().includes(lowerCaseFilter); 
+   });
+   return filterContact;
+ };
 
   return (
     <Application>
